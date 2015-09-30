@@ -7,6 +7,41 @@ package main
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 */
 import "C"
+import (
+	"bytes"
+	"encoding/binary"
+	"unsafe"
+)
+
+func unionToInt(cbytes [192]byte) (result int) {
+	buf := bytes.NewBuffer(cbytes[:])
+	var ptr uint64
+	if err := binary.Read(buf, binary.LittleEndian, &ptr); err == nil {
+		uptr := uintptr(ptr)
+		return *(*int)(unsafe.Pointer(uptr))
+	}
+	return 0
+}
+
+func unionToXKeyEvent(cbytes [192]byte) (result *C.XKeyEvent) {
+	buf := bytes.NewBuffer(cbytes[:])
+	var ptr uint64
+	if err := binary.Read(buf, binary.LittleEndian, &ptr); err == nil {
+		uptr := uintptr(ptr)
+		return (*C.XKeyEvent)(unsafe.Pointer(uptr))
+	}
+	return nil
+}
+
+func unionToXButtonEvent(cbytes [192]byte) (result *C.XButtonEvent) {
+	buf := bytes.NewBuffer(cbytes[:])
+	var ptr uint64
+	if err := binary.Read(buf, binary.LittleEndian, &ptr); err == nil {
+		uptr := uintptr(ptr)
+		return (*C.XButtonEvent)(unsafe.Pointer(uptr))
+	}
+	return nil
+}
 
 func main() {
 	var dpy *C.Display
@@ -21,7 +56,7 @@ func main() {
 
 	C.XGrabKey(
 		dpy,
-		C.XKeysymToKeycode(dpy, C.XStringToKeysym(C.CString("F1"))),
+		C.int(C.XKeysymToKeycode(dpy, C.XStringToKeysym(C.CString("F1")))),
 		C.Mod1Mask,
 		C.XDefaultRootWindow(dpy),
 		1,
@@ -59,25 +94,25 @@ func main() {
 
 	for {
 		C.XNextEvent(dpy, &ev)
-		if ev.Type == C.KeyPress && ev.xkey.subwindow != C.None {
-			C.XRaiseWindow(dpy, ev.xkey.subwindow)
-		} else if ev.Type == C.ButtonPress && ev.xbutton.subwindow != C.None {
-			C.XGetWindowAttributes(dpy, ev.xbutton.subwindow, &attr)
-			start = ev.xbutton
-		} else if ev.Type == C.MotionNotify && start.subwindow != C.None {
-			xdiff := ev.xbutton.x_root - start.x_root
-			ydiff := ev.xbutton.y_root - start.y_root
+		if unionToInt(ev) == C.KeyPress && unionToXKeyEvent(ev).subwindow != C.None {
+			C.XRaiseWindow(dpy, unionToXKeyEvent(ev).subwindow)
+		} else if unionToInt(ev) == C.ButtonPress && unionToXButtonEvent(ev).subwindow != C.None {
+			C.XGetWindowAttributes(dpy, unionToXButtonEvent(ev).subwindow, &attr)
+			start = *unionToXButtonEvent(ev)
+		} else if unionToInt(ev) == C.MotionNotify && start.subwindow != C.None {
+			xdiff := unionToXButtonEvent(ev).x_root - start.x_root
+			ydiff := unionToXButtonEvent(ev).y_root - start.y_root
 
-			toDiffX := 0
-			toDiffY := 0
+			var toDiffX C.int
+			var toDiffY C.int
 
 			if start.button == 1 {
 				toDiffX = xdiff
 				toDiffY = ydiff
 			}
 
-			toWidth := 0
-			toHeight := 0
+			var toWidth C.int
+			var toHeight C.int
 
 			if start.button == 3 {
 				toWidth = xdiff
@@ -89,10 +124,18 @@ func main() {
 				start.subwindow,
 				attr.x+toDiffX,
 				attr.y+toDiffY,
-				MAX(1, attr.width+toWidth),
-				MAX(1, attr.height+toHeight))
-		} else if ev.Type == ButtonRelease {
+				max(1, attr.width+toWidth),
+				max(1, attr.height+toHeight))
+		} else if unionToInt(ev) == C.ButtonRelease {
 			start.subwindow = C.None
 		}
 	}
+}
+
+func max(a, b C.int) C.uint {
+	if a > b {
+		return C.uint(a)
+	}
+
+	return C.uint(b)
 }
