@@ -14,14 +14,14 @@ This file runs /usr/bin/tinywm-session. Create that file now.
 
 ```
 $ sudo cp tinywm-session /usr/bin/
-$ sudo chmod a+x /usr/bin/tinywm
+$ sudo chmod a+x /usr/bin/tinywm-session
 ```
 
-tinwm-session preloads a terminal and then runs the go binary. Build the binary and move it to /usr/bin/.
+tinwm-session preloads a terminal and then runs the go binary. Build the binary and move it to /usr/bin/. On Ubuntu, `go build` may throw `fatal error: X11/Xlib.h: No such file or directory`. Do `sudo apt-get install libx11-dev` to add Xlib.h .
 
 ```
 $ go build
-$ sudo mv tinywm /usr/bin/tinywm
+$ sudo mv tinywm /usr/bin/
 $ sudo chmod a+x /usr/bin/tinywm
 ```
 
