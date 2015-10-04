@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=TinyWM
+Comment=A tiny window manager
+Exec=tinywm-session
+Terminal=False
+TryExec=tinywm
+Type=Application
+
+[Window Manager]
+SessionManaged=true

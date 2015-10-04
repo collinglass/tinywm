@@ -1,0 +1,6 @@
+#!/bin/sh
+xsetroot -solid "#000000"
+xrdb -load $HOME/.Xdefaults
+x-terminal-emulator
+x-terminal-emulator
+exec /usr/bin/tinywm
