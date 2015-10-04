@@ -4,6 +4,12 @@ Port of TinyWM in Go.
 
 ## Usage
 
+Make sure libx11-dev is installed
+
+```
+$ sudo apt-get install libx11-dev
+```
+
 Add the ```.desktop``` file to the xsessions directory. This will add a new selection to the list of window managers at the login screen. 
 
 ```
@@ -14,14 +20,14 @@ This file runs /usr/bin/tinywm-session. Create that file now.
 
 ```
 $ sudo cp tinywm-session /usr/bin/
-$ sudo chmod a+x /usr/bin/tinywm
+$ sudo chmod a+x /usr/bin/tinywm-session
 ```
 
 tinwm-session preloads a terminal and then runs the go binary. Build the binary and move it to /usr/bin/.
 
 ```
 $ go build
-$ sudo mv tinywm /usr/bin/tinywm
+$ sudo mv tinywm /usr/bin/
 $ sudo chmod a+x /usr/bin/tinywm
 ```
 
